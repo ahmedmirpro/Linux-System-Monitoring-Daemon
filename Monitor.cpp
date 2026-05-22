@@ -5,6 +5,7 @@
 #include <fstream>
 #include <ctime>
 #include <csignal>
+#include <sstream>
 
 using namespace std;
 
@@ -19,6 +20,41 @@ std::string Monitor::ReturnDatetime(){
 
     strftime(formatted_time, 50, "%F %T", datetime);
     return std::string(formatted_time);
+}
+
+int Monitor::StatPID(int pid){
+    std::string stat_path = "/proc/" + std::to_string(pid) + "/stat";
+    std::ifstream file(stat_path);
+    if(!file.is_open()){
+        LogMonitoring("Failed to open the file STAT\n");
+        return 1;
+    }
+    std::string line;
+    while(std::getline(file, line)){
+        size_t open_parent = line.find('(');
+        size_t close_parent = line.rfind(')');
+        std::string pid_part = line.substr(0, open_parent - 1);
+        std::string comm_part = line.substr(open_parent + 1, close_parent - open_parent - 1);
+        std::string rest_part = line.substr(close_parent + 2);
+        std::stringstream ss(rest_part); // Create a stringstream object initialized with 'line'
+        std::string field;
+        int index = 3;
+
+        if(open_parent == std::string::npos || close_parent == std::string::npos){
+            LogMonitoring("Invalid State format");
+            return 1;
+        }
+        while(ss >> field){ //قرا كلمة بكلمة من ss وحطّ كل كلمة فـ field، وملي ما يبقاش ما يتقرا، وقف loop.
+            if(index == 14 || index == 15 || index == 22){
+
+                std::cout << index << " - ";
+                LogMonitoring(field);
+            }
+        index++;
+        }
+
+    }
+    return 0;
 }
 
 bool Monitor::ProcessExists(int pid){

@@ -23,6 +23,8 @@ public:
     void DebugLog(const std::string& message);
     std::string ReturnDatetime();
     void LogMonitoring(const std::string& ss); //il recup la valeur stockée deja en memoire en passant l'& de la valeur passé en param
+    int StatPID(int pid);
+
 };
 
 extern volatile sig_atomic_t keep_running; //explain what does extern do here (avoid multiple def maybe)

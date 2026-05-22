@@ -55,6 +55,7 @@ int main(int argc, char *argv[]){
     while(keep_running && mnt.ProcessExists(pid)){ // access(proc_path.c_str(), F_OK) checks whether the path stored in the std::string proc_path exists in the filesystem by converting it to a const char*; it returns 0 if the file/directory exists and -1 otherwise.
         mnt.LogMonitoring("[PID exists]\n");
         mnt.DisplayProcess(mnt.ReturnDatetime());
+        mnt.StatPID(pid);
         sleep(interval);
     }
 
