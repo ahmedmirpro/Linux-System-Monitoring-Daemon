@@ -22,39 +22,73 @@ std::string Monitor::ReturnDatetime(){
     return std::string(formatted_time);
 }
 
-int Monitor::StatPID(int pid){
+Monitor::ProcessCpuStats Monitor::ReadCpuStats(int pid) { // on definit la methode X de la class Monitor, de ProcessCpuStats de la class Monitor
+    ProcessCpuStats stats = {0, 0, 0, 0};
     std::string stat_path = "/proc/" + std::to_string(pid) + "/stat";
     std::ifstream file(stat_path);
     if(!file.is_open()){
         LogMonitoring("Failed to open the file STAT\n");
-        return 1;
+        return stats;
     }
+    
     std::string line;
     while(std::getline(file, line)){
         size_t open_parent = line.find('(');
         size_t close_parent = line.rfind(')');
-        std::string pid_part = line.substr(0, open_parent - 1);
-        std::string comm_part = line.substr(open_parent + 1, close_parent - open_parent - 1);
-        std::string rest_part = line.substr(close_parent + 2);
-        std::stringstream ss(rest_part); // Create a stringstream object initialized with 'line'
-        std::string field;
-        int index = 3;
-
         if(open_parent == std::string::npos || close_parent == std::string::npos){
             LogMonitoring("Invalid State format");
-            return 1;
+            return stats;
         }
-        while(ss >> field){ //قرا كلمة بكلمة من ss وحطّ كل كلمة فـ field، وملي ما يبقاش ما يتقرا، وقف loop.
-            if(index == 14 || index == 15 || index == 22){
+        std::string pid_part = line.substr(0, open_parent);
+        std::string comm_part = line.substr(open_parent + 1, close_parent - open_parent - 1);
+        std::string rest_part = line.substr(close_parent + 2);
+        std::stringstream ss(rest_part); // Lit mot par mot depuis ss et stocke chaque mot dans field ; lorsqu’il n’y a plus rien à lire, la boucle s’arrête.
+        std::string field;
 
-                std::cout << index << " - ";
-                LogMonitoring(field);
+        DebugLog("pid_part: " + pid_part);
+        DebugLog("comm_part: " + comm_part);
+
+        int index = 3;
+
+        while(ss >> field){ // Lit mot par mot depuis ss et stocke chaque mot dans field ; lorsqu’il n’y a plus rien à lire, la boucle s’arrête.
+            // if(index == 14 || index == 15 || index == 22 || index == idx){
+            if(index == 14){
+                stats.utime = std::stol(field);
             }
+            else if(index == 15){
+                stats.stime = std::stol(field);
+            }
+            else if(index == 22){
+                stats.starttime = std::stol(field);
+            }
+            
         index++;
         }
-
+        stats.total_cpu_ticks = stats.utime + stats.stime;
     }
-    return 0;
+    stats.valid = true;
+    return stats;
+}
+
+void Monitor::LogCpuStats(const ProcessCpuStats& stats){
+    if(!stats.valid){
+        LogMonitoring("Invalid CPU Stats!");
+    }
+    else {
+        if(stats.utime != 0){
+            LogMonitoring("- utime: " + std::to_string(stats.utime));
+        }
+        if(stats.stime != 0){
+            LogMonitoring("- stime: " + std::to_string(stats.stime));
+        }
+        if(stats.starttime != 0){
+            LogMonitoring("- starttime: " + std::to_string(stats.starttime));
+        }
+        if(stats.total_cpu_ticks){
+            LogMonitoring("- Total CPU time: " +std::to_string(stats.total_cpu_ticks) + " ticks");
+        }
+        LogMonitoring("--------------------");
+    }
 }
 
 bool Monitor::ProcessExists(int pid){
@@ -81,10 +115,10 @@ int Monitor::DisplayProcess(const std::string& formatted_time){
             line.rfind("PPid:", 0) == 0 ||
             line.rfind("VmRSS:", 0) == 0)
         {
-            LogMonitoring(line);
+            LogMonitoring("- " + line);
         }
     }
-    LogMonitoring("--------------------\n");
+    LogMonitoring("--------------------");
     return 0;
 }
 

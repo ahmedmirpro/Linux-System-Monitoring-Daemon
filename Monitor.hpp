@@ -14,6 +14,14 @@ private:
     std::string status_path;
     bool debug_enabled = false;
 public:
+    /* structures */
+    struct ProcessCpuStats {
+        long utime;
+        long stime;
+        long starttime;
+        long total_cpu_ticks;
+        bool valid = false;
+    };
     /* public attributes - used in main() */ 
     // int pid, interval;
     /* methods */
@@ -23,8 +31,8 @@ public:
     void DebugLog(const std::string& message);
     std::string ReturnDatetime();
     void LogMonitoring(const std::string& ss); //il recup la valeur stockée deja en memoire en passant l'& de la valeur passé en param
-    int StatPID(int pid);
-
+    ProcessCpuStats ReadCpuStats(int pid);
+    void LogCpuStats(const ProcessCpuStats& stats);
 };
 
 extern volatile sig_atomic_t keep_running; //explain what does extern do here (avoid multiple def maybe)

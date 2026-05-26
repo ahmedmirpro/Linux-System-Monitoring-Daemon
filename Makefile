@@ -5,6 +5,7 @@ TARGET = Monitor
 SRC = Main.cpp Monitor.cpp
 PID ?= 370
 INTERVAL ?= 2
+STAT_IDX ?=1
 
 all:
 	$(CXX) $(CXXFLAGS) $(SRC) -o $(TARGET)
@@ -16,7 +17,7 @@ r: all
 	./$(TARGET) $(PID) $(INTERVAL)
 
 rd: debug
-	./$(TARGET) $(PID) $(INTERVAL)
+	./$(TARGET) $(PID) $(INTERVAL) $(STAT_IDX)
 
 c:clean
 clean:
