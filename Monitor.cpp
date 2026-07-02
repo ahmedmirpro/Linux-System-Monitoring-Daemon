@@ -42,7 +42,7 @@ Monitor::ProcessCpuStats Monitor::ReadCpuStats(int pid) { // on definit la metho
         std::string pid_part = line.substr(0, open_parent);
         std::string comm_part = line.substr(open_parent + 1, close_parent - open_parent - 1);
         std::string rest_part = line.substr(close_parent + 2);
-        std::stringstream ss(rest_part); // Lit mot par mot depuis ss et stocke chaque mot dans field ; lorsqu’il n’y a plus rien à lire, la boucle s’arrête.
+        std::stringstream ss(rest_part); // Créer un flux ss à partir de la string rest_part, pour pouvoir la lire comme si c’était un fichier ou un flux.
         std::string field;
 
         DebugLog("pid_part: " + pid_part);
@@ -51,7 +51,7 @@ Monitor::ProcessCpuStats Monitor::ReadCpuStats(int pid) { // on definit la metho
         int index = 3;
 
         while(ss >> field){ // Lit mot par mot depuis ss et stocke chaque mot dans field ; lorsqu’il n’y a plus rien à lire, la boucle s’arrête.
-            // if(index == 14 || index == 15 || index == 22 || index == idx){
+            //Tant qu'il est possible de lire un mot depuis le flux ss, le stocker dans field et exécuter la boucle.
             if(index == 14){
                 stats.utime = std::stol(field);
             }
@@ -109,7 +109,7 @@ int Monitor::DisplayProcess(const std::string& formatted_time){
     LogMonitoring("-----PID Info-----\n");
     LogMonitoring("["+ formatted_time +"]");
     while(std::getline(file, line)){ //pid_name // std::getline(file, line) كتقرا سطر واحد من الملف وتحطو فـ line، وifstream كيبقى حافظ داخلياً على position ديال القراءة (cursor)، لذلك كل مرة كتعاود تتنادى داخل while كتقرا automatiquement السطر اللي من بعد حتى توصل لنهاية الملف، وفي هاد اللحظة getline() كترجع false وكتوقف loop.
-        if(line.rfind("Name:", 0) == 0 ||
+        if(line.rfind("Name:", 0) == 0 || //commencer la rechecrche a partir de la pos 0
             line.rfind("State:", 0) == 0 ||
             line.rfind("Pid:", 0) == 0 ||
             line.rfind("PPid:", 0) == 0 ||

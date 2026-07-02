@@ -6,7 +6,7 @@
 
 using namespace std;
 
-volatile sig_atomic_t keep_running = 1;
+volatile sig_atomic_t keep_running = 1; // volatile means this signal might be updated by a 3rd part outside the code (system)
 
 void sigint_handler(int sig){
     (void) sig;
@@ -25,7 +25,7 @@ int main(int argc, char *argv[]){
         mnt.EnableDebug(false);
     #endif
 
-    signal(SIGINT, sigint_handler);
+    signal(SIGINT, sigint_handler); // equivalent to sigint_handler(SIGINT) = to be checked
 
     #ifndef DEBUG_MODE
     if(argc !=3){ // make sure the user did not type more than 2 argument
