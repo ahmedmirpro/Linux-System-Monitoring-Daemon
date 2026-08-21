@@ -1,3 +1,7 @@
+/**
+ * هادشي كيتسمّى include guard، والهدف ديالو هو يمنع نفس الـ header من أنه يتـinclude أكثر من مرة أثناء compilation.
+ * if not def MONITOR_HPP, define MONITOR_HPP ==> it means the define will be here only, if detected by compiled somewhere else it won't compile
+ */
 #ifndef MONITOR_HPP
 #define MONITOR_HPP
 
@@ -10,16 +14,17 @@ class Monitor
 {
 private:
     /** private attributes - used in methods() or accessed by setters/getters */ 
-    std::string proc_path;
+    std::string proc_path; // build path for process of the PID
     std::string status_path;
     bool debug_enabled = false;
 public:
     /* structures */
     struct ProcessCpuStats {
-        long utime;
-        long stime;
-        long starttime;
+        long utime; // user time
+        long stime; // system time
+        long starttime; // to capture at the beginning of the runtime
         long total_cpu_ticks;
+        double total_cpu_seconds;
         bool valid = false;
     };
     /* public attributes - used in main() */ 
